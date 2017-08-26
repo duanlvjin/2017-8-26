@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+<!--     <link rel="stylesheet" type="text/css" href="css/index.css" /> -->
+    <title>phoneGap作业</title>
+    <style>
+        .aaa{
+            background:#ccc;
+            margin:5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="aaa">
+          <h2>重力感应</h2>
+          <input type="button" value="获取一次重力感应" id="btn1">
+          <input type="button" value="开启实时重力感应" id="btn2">
+          <input type="button" value="关闭实时" id="btn3">
+          <div id="div1">无</div>
+        </div>
+        <div class="aaa">
+          <h2>拍照</h2>
+          <input type="button" value="拍照" id="btn4">
+        </div>
+        <div class="aaa">
+          <h2>音频视频采集</h2>
+          <input type="button" value="录音" id="btn5">
+          <input type="button" value="录像" id="btn6">
+          <audio src="" id="a1"></audio>
+          <video src="" id="v1"></video>
+        </div>
+        <div class="aaa">
+          <h2>罗盘指南针</h2>
+          <input type="button" value="获取一次朝向" id="btn7">
+          <input type="button" value="开启实时朝向" id="btn8">
+          <input type="button" value="关闭实时" id="btn9">
+          <div id="cmp">无</div>
+        </div>
+        <div class="aaa">
+          <h2>wifi链接状况</h2>
+          <input type="button" value="网络链接状况" id="btn10">
+          <div id="wifi"></div>
+        </div>
+        <div class="aaa">
+          <h2>通讯录操作</h2>
+          <input type="button" value="新建联系人" id="btn11">
+          <input type="button" value="查找联系人" id="btn12">
+          <div id="ctt"></div>
+        </div>
+        <div class="aaa">
+          <h2>获取设备信息</h2>
+          <input type="button" value="获取设备信息" id="btn13">
+          <div id="dvc"></div>
+        </div>
+        <div class="aaa">
+          <h2>弹出框等</h2>
+          <input type="button" value="alert" id="btn14">
+          <input type="button" value="comfirm" id="btn15">
+          <input type="button" value="beep" id="btn16">
+          <input type="button" value="vibrate" id="btn17">
+        </div>
+        <div class="aaa">
+          <h2>获取位置</h2>
+          <input type="button" value="获取一次位置" id="btn18">
+          <input type="button" value="开启实时位置" id="btn19">
+          <input type="button" value="关闭实时" id="btn20">
+          <div id="llt">无</div>
+        </div>
+
+    </div>
+
+
+
+
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript">
+        app.initialize();
+        function rnd(n,m){return parseInt(n+Math.random()*(m-n))}
+        document.addEventListener('DOMContentLoaded',function(){
+            var oDiv=document.getElementById('div1');
+            var oBtn1=document.getElementById('btn1');
+            var oBtn2=document.getElementById('btn2');
+            var oBtn3=document.getElementById('btn3');
+            //获取重力感应
+            oBtn1.onclick=function(){
+                navigator.accelerometer.getCurrentAcceleration(function(data){oDiv.innerHTML=data.x+'/'+data.y+'/'+data.z},function(){})
+            }
+            var watchID=null;
+            oBtn2.onclick=function(){
+                watchID=navigator.accelerometer.watchAcceleration(function(data){
+                    oDiv.innerHTML=data.x+'/'+data.y+'/'+data.z;
+                },function(){},{frequency:300});
+            }
+            oBtn3.onclick=function(){
+                navigator.accelerometer.clearWatch(watchID);
+            }
+            // 拍照
+            var oBtn4=document.getElementById('btn4');
+            oBtn4.onclick=function(){
+              navigator.camera.getPicture(function(data){
+                var oImg=new Image();
+                oImg.src = "data:image/jpeg;base64,"+data;
+                oImg.width=100;
+                document.body.appendChild(oImg);
+              },function(err){
+                alert(err);
+              },{
+                quality:80, 
+                destinationType:0,
+                allowEdit:true,
+                encodingType:0, 
+                targetWidth:100,
+                targetHeight:100,
+              })
+            }
+            //录音，录像
+            var oBtn5=document.getElementById('btn5');
+            var oBtn6=document.getElementById('btn6');
+            var oA=document.getElementById('a1');
+            var oV=document.getElementById('v1');
+            //录音
+            oBtn5.onclick=function(){
+              navigator.device.capture.captureAudio(
+                function(data){
+                  oA.src=data[0].fullPath;
+                  oA.play();
+                },function(err){
+                  alert(err)
+                },{
+                  limit:1
+                })
+            }
+            //录像
+            oBtn6.onclick=function(){
+              navigator.device.capture.captureVideo(function(data){
+                oV.src=data[0].fullPath;
+                oV.play();
+              },function(err){
+                alert(err);
+              },{
+                limit:1,
+                duration:5
+              })
+            }
+            //罗盘
+            var oBtn7=document.getElementById('btn7');
+            var oBtn8=document.getElementById('btn8');
+            var oBtn9=document.getElementById('btn9');
+            var oCmp=document.getElementById('cmp');
+            oBtn7.onclick=function(){
+              navigator.compass.getCurrentHeading(function(data){
+                oCmp.innerHTML=data.magneticHeading;
+              },function(err){
+                alert(err);
+              })
+            }
+            var watchCMP=null;
+            oBtn8.onclick=function(){
+              watchCMP=navigator.compass.watchHeading(function(data){
+                oCmp.innerHTML=data.magneticHeading;
+              },function(err){
+                alert(err);
+              },{
+                frequency:200
+              })
+            }
+            oBtn9.onclick=function(){
+              navigator.compass.clearWatch(watchCMP);
+            }
+            //网络链接状况
+            var oBtn10=document.getElementById('btn10');
+            var oWifi=document.getElementById('wifi');
+            oBtn10.onclick=function(){
+              var networkState = navigator.network.connection.type;  
+              var states = {};
+              states[Connection.UNKNOWN]  = 'Unknown connection';
+              states[Connection.ETHERNET] = 'Ethernet connection';
+              states[Connection.WIFI]     = 'WiFi connection';
+              states[Connection.CELL_2G]  = 'Cell 2G connection';
+              states[Connection.CELL_3G]  = 'Cell 3G connection';
+              states[Connection.CELL_4G]  = 'Cell 4G connection';
+              states[Connection.NONE]     = 'No network connection';              
+              oWifi.innerHTML="网络链接状况："+states[networkState];
+            }
+            //通讯录操作
+            var oBtn11=document.getElementById('btn11');
+            var oBtn12=document.getElementById('btn12');
+            var oCtt=document.getElementById('ctt');
+            oBtn11.onclick=function(){
+              var myContact = navigator.service.contacts.create({"displayName": "Test User"});
+              myContact.gender = "male";
+              // oWifi.innerHTML = 
+              oCtt.innerHTML = "The contact, " + myContact.displayName + ", is of the " + myContact.gender + " gender";
+            }
+            oBtn12.onclick=function(){
+              var options = new ContactFindOptions();
+              options.filter="Bob";
+              var fields = ["displayName", "name"];
+              navigator.service.contacts.find(fields, 
+                function (contacts) {
+                  for (var i=0; i<contacts.length; i++) {
+                    oCtt.innerHTML = "Display Name = " + contacts[i].displayName;
+                  }
+                }
+                , function onError() {
+                    alert('onError!');
+                  }, options);
+            }
+            //获取设备信息
+            var oBtn13=document.getElementById('btn13');
+            var oDvc=document.getElementById('dvc');
+            oBtn13.onclick=function(){  
+              oDvc.innerHTML = '设备的型号名称: '     + device.name     + '<br />' + 
+              'PhoneGap版本信息: ' + device.phonegap + '<br />' + 
+              '操作系统名称: ' + device.platform + '<br />' + 
+              '设备唯一标识符: '     + device.uuid     + '<br />' + 
+              '操作系统的版本号: '  + device.version  + '<br />';
+            }
+            //弹出框
+            var oBtn14=document.getElementById('btn14');
+            var oBtn15=document.getElementById('btn15');
+            var oBtn16=document.getElementById('btn16');
+            var oBtn17=document.getElementById('btn17');
+            oBtn14.onclick=function(){
+              navigator.notification.alert('你确定给我钱?', function(){
+              alert('确定了我去办事了')
+              }, '标题', '确定');
+            }
+            oBtn15.onclick=function(){
+              navigator.notification.confirm('内容?', function(index){
+                alert(index)
+              }, '标题', '确定,取消');
+            };
+            oBtn16.onclick=function(){
+              navigator.notification.beep(2);
+            };
+            oBtn17.onclick=function(){
+              navigator.notification.vibrate(1000);
+            };
+            //获取位置
+            var oBtn18=document.getElementById('btn18');
+            var oBtn19=document.getElementById('btn19');
+            var oBtn20=document.getElementById('btn20');
+            var oLlt=document.getElementById('llt');
+            oBtn18.onclick=function(){
+                navigator.geolocation.getCurrentPosition(
+                  function(position){
+                    oLlt.innerHTML = 'Latitude: '           + position.coords.latitude              + '<br />' +
+                      '经度: '          + position.coords.longitude             + '<br />' +
+                      '纬度: '           + position.coords.altitude              + '<br />' +
+                      'Accuracy: '           + position.coords.accuracy              + '<br />' +
+                      'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
+                      'Heading: '            + position.coords.heading               + '<br />' +
+                      'Speed: '              + position.coords.speed                 + '<br />' +
+                      'Timestamp: '          + new Date(position.timestamp)          + '<br />';
+                  },function (error) {
+                      alert('code: '    + error.code    + '\n' +
+                        'message: ' + error.message + '\n');
+                    })
+            }
+
+            var watchLlt=null;
+            oBtn19.onclick=function(){
+                watchLlt=navigator.geolocation.watchPosition(function(position){
+                    oLlt.innerHTML='纬度: '+ position.coords.latitude+ '<br>' +
+                      '经度: ' + position.coords.longitude+ '<br>' +
+                      '<hr>'; 
+                },function (error) {
+                    alert('code: '    + error.code    + '\n' +
+                      'message: ' + error.message + '\n');
+                  },{frequency:200});
+            }
+            oBtn20.onclick=function(){
+                navigator.geolocation.clearWatch(watchLlt);
+            }
+        },false)
+    </script>
+</body>
+
+</html>
